@@ -24,23 +24,33 @@ void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, 
 		qsort(eggs, MAX_EGGS, sizeof(t_eggs), compare_eggs);
 }
 
-int getNumberofNeighbors(t_cell *cells, int cell_index) {
-	int number_of_neighbors = 0;
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i) {
+    t_target* targets = malloc(sizeof(t_target) * 1);
 
-	if(cells[cell_index].neigh_0 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_1 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_2 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_3 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_4 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_5 != -1)
-		number_of_neighbors++;
-	return number_of_neighbors;
+        int base_index = my_base_indices[i];
+
+        // Calculer les distances
+        calculate_distances(cells, number_of_cells, base_index);
+
+        // Allouer de la mémoire pour les ressources et les œufs
+        t_ressource* ressources = malloc(sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        t_eggs* eggs = malloc(sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Initialiser les tableaux avec des zéros
+        memset(ressources, 0, sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        memset(eggs, 0, sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Analyser les ressources et les œufs
+        parse_rs_eggs(cells, number_of_cells, ressources, eggs);
+
+        // Assigner les valeurs aux cibles
+        targets[0].base_index = base_index;
+        targets[0].ressources = ressources;
+        targets[0].eggs = eggs;
+
+    return *targets;
 }
+
 
 void parse_cells(t_cell *cells, int number_of_cells){
 	for (int i = 0; i < number_of_cells; i++)
@@ -60,22 +70,23 @@ void parse_cells(t_cell *cells, int number_of_cells){
 };
 
 void delete_resource(t_ressource* ressources, int index) {
-    if (index >= 0 && index < MAX_RESSOURCES) {
-        for (int i = index; i < MAX_RESSOURCES - 1; i++) {
-            ressources[i] = ressources[i + 1];
-        }
-        MAX_RESSOURCES--;
+    for (int i = index; i < MAX_RESSOURCES - 1; i++) {
+        ressources[i] = ressources[i + 1];
     }
+
+    memset(&ressources[MAX_RESSOURCES - 1], 0, sizeof(t_ressource));
 }
 
 void delete_egg(t_eggs* eggs, int index) {
-    if (index >= 0 && index < MAX_EGGS) {
-        for (int i = index; i < MAX_EGGS - 1; i++) {
-            eggs[i] = eggs[i + 1];
-        }
-        MAX_EGGS--;
+    // Déplacer les éléments suivants vers la gauche pour remplacer l'élément supprimé
+    for (int i = index; i < MAX_EGGS - 1; i++) {
+        eggs[i] = eggs[i + 1];
     }
+
+    // Réinitialiser le dernier élément
+    memset(&eggs[MAX_RESSOURCES - 1], 0, sizeof(t_ressource));
 }
+
 
 void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
     int* queue = malloc(sizeof(int) * number_of_cells);

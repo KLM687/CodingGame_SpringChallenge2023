@@ -54,5 +54,6 @@ void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
 void print_targets(t_target *targets, int number_of_bases);
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
 
 #endif

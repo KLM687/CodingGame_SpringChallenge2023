@@ -33,35 +33,22 @@ int main() {
 		fprintf(stderr, "my base index: %d\n", my_base_indices[i]);
 	}
 
-	t_target *targets = malloc(sizeof(t_target) * number_of_bases);
+	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
 
-	for (int i = 0; i < number_of_bases; i++){
-		// calculate distances
-    	calculate_distances(cells, number_of_cells, my_base_indices[i]);
-		//parse ressources and eggs
-		t_ressource *ressources = malloc(sizeof(t_ressource) * MAX_RESSOURCES + 1);
-		t_eggs *eggs = malloc(sizeof(t_eggs) * MAX_EGGS + 1);
-		bzero(ressources, sizeof(t_ressource) * MAX_RESSOURCES + 1);
-		bzero(eggs, sizeof(t_eggs) * MAX_EGGS + 1);
-		parse_rs_eggs(cells, number_of_cells, ressources, eggs);
-		targets[i].base_index = my_base_indices[i];
-		targets[i].ressources = ressources;
-		targets[i].eggs = eggs;
-		free(ressources);
-		free(eggs);
+	for (int i = 0; i < number_of_bases; i++) {
+		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
 	}
 
-	//fprintf(stderr, "----------------\n");
-	//for (int i = 0; i < number_of_bases; i++){
-		//fprintf(stderr, "BASE %d\n", i);
-		//for (int x = 0; x < MAX_EGGS; x++) {
-			//if (x < MAX_EGGS)
-				//fprintf(stderr, "EGGS %d, distance %d\n", targets[i].eggs[x].cell_index, targets[i].eggs[x].distance_to_base);
-		//}
-		//for (int x = 0; x < MAX_RESSOURCES; x++){
-			//fprintf(stderr, "Ressource %d, distance %d\n", targets[i].ressources[x].cell_index, targets[i].ressources[x].distance_to_base);
-		//}
-	//}
+	fprintf(stderr, "----------------\n");
+	for (int i = 0; i < number_of_bases; i++){
+		fprintf(stderr, "BASE %d index = %d\n", i, targets[i].base_index);
+		for (int x = 0; x < MAX_EGGS; x++) {
+			fprintf(stderr, "EGGS %d, distance %d\n", targets[i].eggs[x].cell_index, targets[i].eggs[x].distance_to_base);
+		}
+		for (int x = 0; x < MAX_RESSOURCES; x++){
+			fprintf(stderr, "Ressource %d, distance %d\n", targets[i].ressources[x].cell_index, targets[i].ressources[x].distance_to_base);
+		}
+	}
 
 
     // MAIN LOOP
@@ -73,19 +60,20 @@ int main() {
             scanf("%d %d %d", &nb_resources, &my_ants, &opp_ants);
 			if (nb_resources == 0)
 			{
-				for (int x = 0; x < MAX_RESSOURCES; x++)
+				for (int b = 0; b < number_of_bases; b++)
 				{
-					for (int y = 0; y < number_of_bases; y++)
+					for (int x = 0; x < MAX_EGGS; x++)
 					{
-						if (targets[y].ressources[x].cell_index == i)
+						if (targets[b].eggs[x].cell_index == i)
 						{
-							delete_resource(targets[y].ressources, x);
-							fprintf(stderr, "MAX_RESSOURCES = %d\n", MAX_RESSOURCES);
+							delete_egg(targets[b].eggs, x);
 						}
-						if (targets[y].eggs[x].cell_index == i)
+					}
+					for (int x = 0; x < MAX_RESSOURCES; x++)
+					{
+						if (targets[b].ressources[x].cell_index == i)
 						{
-							delete_egg(targets[y].eggs, x);
-							fprintf(stderr, "MAX_EGGS = %d\n", MAX_EGGS);
+							delete_resource(targets[b].ressources, x);
 						}
 					}
 				}

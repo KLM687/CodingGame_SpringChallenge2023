@@ -51,12 +51,6 @@ int main() {
 		}
 	}
 
-	wait = targets[0].eggs[0].distance_to_base;
-	for (int i = 1; i < number_of_bases; i++){
-		if (targets[i].eggs[0].distance_to_base < wait)
-			wait =targets[i].eggs[0].distance_to_base;
-	}
-
     // MAIN LOOP
     while (1) {
         for (int i = 0; i < number_of_cells; i++) {

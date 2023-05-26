@@ -73,17 +73,15 @@ void delete_resource(t_ressource* ressources, int index) {
     for (int i = index; i < MAX_RESSOURCES - 1; i++) {
         ressources[i] = ressources[i + 1];
     }
-    memset(&ressources[MAX_RESSOURCES - 1], 0, sizeof(t_ressource));
+    memset(&ressources[MAX_RESSOURCES - 1], -1, sizeof(t_ressource));
 }
 
 void delete_egg(t_eggs* eggs, int index) {
-    // Déplacer les éléments suivants vers la gauche pour remplacer l'élément supprimé
     for (int i = index; i < MAX_EGGS - 1; i++) {
         eggs[i] = eggs[i + 1];
     }
 
-    // Réinitialiser le dernier élément
-    memset(&eggs[MAX_RESSOURCES - 1], 0, sizeof(t_ressource));
+    memset(&eggs[MAX_EGGS - 1], -1, sizeof(t_ressource));
 }
 
 

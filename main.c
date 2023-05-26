@@ -43,18 +43,15 @@ int compare_eggs(const void *a, const void *b);
 void delete_resource(t_ressource *ressources, int index);
 void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
-void parse_rs(t_cell *cells, int number_of_cells, t_ressource *ressources);
-void parse_egg(t_cell *cells, int number_of_cells, t_eggs *eggs);
+void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
 void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs);
 
 int main() {
-	
+
 	int number_of_cells;
 	scanf("%d", &number_of_cells);
 
 	t_cell cells[number_of_cells + 1];
-	t_ressource ressources[MAX_RESSOURCES + 1];
-	t_eggs eggs[MAX_EGGS + 1];
 	
 	// parse cells
 	parse_cells(cells, number_of_cells);
@@ -77,21 +74,29 @@ int main() {
 
     // calculate distances
     calculate_distances(cells, number_of_cells, my_base_index);
-	// parse ressources and eggs
-	parse_rs(cells, number_of_cells, ressources);
-	for (int x = 0 ; x < MAX_RESSOURCES; x++)
+	//parse ressources and eggs
+	t_ressource *ressources = malloc(sizeof(t_ressource) * MAX_RESSOURCES + 1);
+	t_eggs *eggs = malloc(sizeof(t_eggs) * MAX_EGGS + 1);
+	
+	if (ressources == NULL || eggs == NULL)
 	{
-		fprintf(stderr, "Ressource %d, distance %d\n", ressources[x].cell_index, ressources[x].distance_to_base);
-	}
-	//parse_egg(cells, number_of_cells, eggs);
-	for (int x = 0 ; x < MAX_RESSOURCES; x++)
-	{
-		fprintf(stderr, "-Ressource %d, distance %d\n", ressources[x].cell_index, ressources[x].distance_to_base);
+		fprintf(stderr, "malloc failed\n");
+		return 1;
 	}
 
+	bzero(ressources, sizeof(t_ressource) * MAX_RESSOURCES + 1);
+	bzero(eggs, sizeof(t_eggs) * MAX_EGGS + 1);
+	
+	parse_rs_eggs(cells, number_of_cells, ressources, eggs);
+
+	fprintf(stderr, "----------------\n");
+	for (int x = 0 ; x < MAX_RESSOURCES; x++){
+		fprintf(stderr, "Ressource %d, distance %d\n;", ressources[x].cell_index, ressources[x].distance_to_base);
+	}
 	for (int x = 0; x < MAX_EGGS; x++) {
         fprintf(stderr, "EGGS %d, distance %d\n", eggs[x].cell_index, eggs[x].distance_to_base);
     }
+
     // MAIN LOOP
     while (1) {
         for (int i = 0; i < number_of_cells; i++) {
@@ -117,44 +122,40 @@ int main() {
 			}
         }
 		print_targets(my_base_index, ressources, eggs);
+		break;
     }
     free(my_base_indices);
     free(opp_base_indices);
     return 0;
 }
 
-void parse_rs(t_cell *cells, int number_of_cells, t_ressource *ressources) {
+//------------------ FUNCTIONS ------------------//
+
+void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs) {
     int ressource_index = 0;
+	int egg_index = 0;
 	
-	bzero(ressources, sizeof(t_ressource) * MAX_RESSOURCES);
     for (int i = 0; i < number_of_cells; i++) {
+		fprintf(stderr,	"Cell %d, type %d\n", cells[i].index, cells[i].type);
+		if (cells[i].type == 1){
+			eggs[egg_index].type = cells[i].type;
+			eggs[egg_index].cell_index = cells[i].index;
+			eggs[egg_index].distance_to_base = cells[i].distance_to_base;
+			egg_index++;
+		}
         if (cells[i].type == 2) {
             ressources[ressource_index].type = cells[i].type;
             ressources[ressource_index].cell_index = cells[i].index;
             ressources[ressource_index].distance_to_base = cells[i].distance_to_base;
             ressource_index++;
         }
+		fprintf(stderr, "\n");
     }
 	if (MAX_RESSOURCES > 0)
 		qsort(ressources, MAX_RESSOURCES, sizeof(t_ressource), compare_ressources);
-}
-
-void parse_egg(t_cell *cells, int number_of_cells, t_eggs *eggs){
-	int eggs_index = 0;
-
-	bzero(eggs, sizeof(t_eggs) * MAX_EGGS);
-    for (int i = 0; i < number_of_cells; i++) {
-        if (cells[i].type == 1) {
-            eggs[eggs_index].type = cells[i].type;
-            eggs[eggs_index].cell_index = cells[i].index;
-            eggs[eggs_index].distance_to_base = cells[i].distance_to_base;
-            eggs_index++;
-        }
-    }
 	if (MAX_EGGS > 0)
 		qsort(eggs, MAX_EGGS, sizeof(t_eggs), compare_eggs);
 }
-
 
 void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs){
 	if (MAX_RESSOURCES >= 0)
@@ -207,13 +208,12 @@ int compare_ressources(const void* a, const void* b) {
     const t_ressource* ressource_a = (const t_ressource*)a;
     const t_ressource* ressource_b = (const t_ressource*)b;
 
-    if (ressource_a->distance_to_base < ressource_b->distance_to_base) {
-        return -1;
-    } else if (ressource_a->distance_to_base > ressource_b->distance_to_base) {
-        return 1;
-    } else {
-        return 0;
-    }
+	if (ressource_a->distance_to_base < ressource_b->distance_to_base)
+		return -1;
+	else if (ressource_a->distance_to_base > ressource_b->distance_to_base)
+		return 1;
+	else
+		return 0;
 }
 
 
@@ -221,13 +221,12 @@ int compare_eggs(const void* a, const void* b) {
 	t_eggs* egg_a = (t_eggs*)a;
 	t_eggs* egg_b = (t_eggs*)b;
 
-	if (egg_a->distance_to_base < egg_b->distance_to_base) {
+	if (egg_a->distance_to_base < egg_b->distance_to_base) 
 		return -1;
-	} else if (egg_a->distance_to_base > egg_b->distance_to_base) {
+	else if (egg_a->distance_to_base > egg_b->distance_to_base) 
 		return 1;
-	} else {
+	else 
 		return 0;
-	}
 }
 
 void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {

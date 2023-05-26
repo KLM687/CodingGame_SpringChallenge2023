@@ -3,6 +3,7 @@
 int MAX_RESSOURCES = 0;
 int MAX_EGGS = 0;
 int TURN = 1;
+int wait = 0;
 
 int main() {
 
@@ -50,6 +51,11 @@ int main() {
 		}
 	}
 
+	wait = targets[0].eggs[0].distance_to_base;
+	for (int i = 1; i < number_of_bases; i++){
+		if (targets[i].eggs[0].distance_to_base < wait)
+			wait =targets[i].eggs[0].distance_to_base;
+	}
 
     // MAIN LOOP
     while (1) {

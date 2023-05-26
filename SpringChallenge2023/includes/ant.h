@@ -10,6 +10,7 @@
 extern int MAX_RESSOURCES;
 extern int MAX_EGGS;
 extern int TURN;
+extern int wait;
 
 // Structure pour stocker les informations d'une cellule
 typedef struct s_cell {

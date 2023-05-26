@@ -73,7 +73,6 @@ void delete_resource(t_ressource* ressources, int index) {
     for (int i = index; i < MAX_RESSOURCES - 1; i++) {
         ressources[i] = ressources[i + 1];
     }
-
     memset(&ressources[MAX_RESSOURCES - 1], 0, sizeof(t_ressource));
 }
 

@@ -2,6 +2,7 @@
 
 int MAX_RESSOURCES = 0;
 int MAX_EGGS = 0;
+int TURN = 1;
 
 int main() {
 
@@ -45,7 +46,7 @@ int main() {
 	bzero(ressources, sizeof(t_ressource) * MAX_RESSOURCES + 1);
 	bzero(eggs, sizeof(t_eggs) * MAX_EGGS + 1);
 	
-	parse(cells, number_of_cells, ressources, eggs);
+	parse_rs_eggs(cells, number_of_cells, ressources, eggs);
 
 	fprintf(stderr, "----------------\n");
 	for (int x = 0 ; x < MAX_RESSOURCES; x++){

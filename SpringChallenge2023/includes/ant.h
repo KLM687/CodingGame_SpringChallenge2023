@@ -40,6 +40,12 @@ typedef struct s_eggs {
     int distance_to_base;
 } t_eggs;
 
+typedef struct s_target {
+	int base_index;
+	t_ressource *ressources;
+	t_eggs *eggs;
+} t_target;
+
 void calculate_distances(t_cell *cells, int number_of_cells, int base_index);
 int compare_ressources(const void *a, const void *b);
 int compare_eggs(const void *a, const void *b);
@@ -47,6 +53,6 @@ void delete_resource(t_ressource *ressources, int index);
 void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
-void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs);
+void print_targets(t_target *targets, int number_of_bases);
 
 #endif

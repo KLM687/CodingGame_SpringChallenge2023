@@ -1,17 +1,20 @@
 #include "ant.h"
 
-void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs){
-	for (int i = 0; i < TURN; i++){
-		if(i < MAX_EGGS) 
-			printf("LINE %d %d %d;", my_base_index, eggs[i].cell_index, 3);
+void print_targets(t_target *targets, int number_of_bases){
+
+	for (int i = 0; i < number_of_bases; i++){
+		fprintf(stderr, "BASE %d\n", i);
+		for (int x = 0; x < TURN; x++) {
+			if (x < MAX_EGGS)
+				printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs->cell_index, 1);
+		}
+		if (TURN > 4 || MAX_EGGS == 0)
+		{
+			for (int x = 0; x < TURN; x++){
+				if (x < MAX_RESSOURCES)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].ressources->cell_index, 1);}
+		}
 	}
-    if (TURN > 3)
-    {
-	    for (int i = 0; i < TURN; i++){
-		    if (i < MAX_RESSOURCES)
-			    printf("LINE %d %d %d;", my_base_index, ressources[i].cell_index, 3);
-	    }
-    }
 	TURN++;
 	printf("\n");
 }

@@ -64,6 +64,7 @@ void parse_cells(t_cell *cells, int number_of_cells){
 			MAX_EGGS++;
 		}
 		if (cells[i].type == 2) {
+			
 			MAX_RESSOURCES++;
 		}
 	}

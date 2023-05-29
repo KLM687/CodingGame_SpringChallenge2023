@@ -9,7 +9,11 @@
 
 extern int MAX_RESSOURCES;
 extern int MAX_EGGS;
-
+extern int TURN;
+extern int GOAL;
+extern int CRYSTAL;
+extern int STRATEGY;
+extern int START_CRYSTAL;
 // Structure pour stocker les informations d'une cellule
 typedef struct s_cell {
     int index;
@@ -39,6 +43,12 @@ typedef struct s_eggs {
     int distance_to_base;
 } t_eggs;
 
+typedef struct s_target {
+	int base_index;
+	t_ressource *ressources;
+	t_eggs *eggs;
+} t_target;
+
 void calculate_distances(t_cell *cells, int number_of_cells, int base_index);
 int compare_ressources(const void *a, const void *b);
 int compare_eggs(const void *a, const void *b);
@@ -46,18 +56,25 @@ void delete_resource(t_ressource *ressources, int index);
 void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
-void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs);
+void print_targets(t_target *targets, int number_of_bases);
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
 
 #endif
 
 int MAX_RESSOURCES = 0;
 int MAX_EGGS = 0;
+int TURN = 0;
+int GOAL = 0;
+int CRYSTAL = 0;
+int STRATEGY = 1;
+int START_CRYSTALL = 0;
+
 
 int main() {
 
 	int number_of_cells;
 	scanf("%d", &number_of_cells);
-
+	
 	t_cell cells[number_of_cells + 1];
 	
 	// parse cells
@@ -66,6 +83,7 @@ int main() {
 	// NOMBRE DE BASES
     int number_of_bases;
     scanf("%d", &number_of_bases);
+	fprintf(stderr, "number of bases: %d\n", number_of_bases);
 
     int* my_base_indices = malloc(sizeof(int) * number_of_bases);
     int* opp_base_indices = malloc(sizeof(int) * number_of_bases);
@@ -76,33 +94,14 @@ int main() {
     for (int i = 0; i < number_of_bases; i++) {
         scanf("%d", &opp_base_indices[i]);
     }
-
-    int my_base_index = my_base_indices[0];
-
-
-	// calculate distances
-    calculate_distances(cells, number_of_cells, my_base_index);
-	//parse ressources and eggs
-	t_ressource *ressources = malloc(sizeof(t_ressource) * MAX_RESSOURCES + 1);
-	t_eggs *eggs = malloc(sizeof(t_eggs) * MAX_EGGS + 1);
-	
-	if (ressources == NULL || eggs == NULL)
-	{
-		fprintf(stderr, "malloc failed\n");
-		return 1;
+	for (int i = 0; i < number_of_bases; i++) {
+		fprintf(stderr, "my base index: %d\n", my_base_indices[i]);
 	}
 
-	bzero(ressources, sizeof(t_ressource) * MAX_RESSOURCES + 1);
-	bzero(eggs, sizeof(t_eggs) * MAX_EGGS + 1);
-	
-	parse_rs_eggs(cells, number_of_cells, ressources, eggs);
-
-	for (int x = 0 ; x < MAX_RESSOURCES; x++){
-		fprintf(stderr, "Ressource %d, distance %d\n", ressources[x].cell_index, ressources[x].distance_to_base);
+	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
+	for (int i = 0; i < number_of_bases; i++) {
+		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
 	}
-	for (int x = 0; x < MAX_EGGS; x++) {
-        fprintf(stderr, "EGGS %d, distance %d\n", eggs[x].cell_index, eggs[x].distance_to_base);
-    }
 
     // MAIN LOOP
     while (1) {
@@ -113,22 +112,26 @@ int main() {
             scanf("%d %d %d", &nb_resources, &my_ants, &opp_ants);
 			if (nb_resources == 0)
 			{
-				for (int x = 0; x < MAX_RESSOURCES; x++)
+				for (int b = 0; b < number_of_bases; b++)
 				{
-					if (ressources[x].cell_index == i && cells[i].type == 2)
+					for (int x = 0; x < MAX_EGGS; x++)
 					{
-						delete_resource(ressources, x);
-						fprintf(stderr, "MAX_RESSOURCES = %d\n", MAX_RESSOURCES);
+						if (targets[b].eggs[x].cell_index == i)
+						{
+							delete_egg(targets[b].eggs, x);
+						}
 					}
-					if (eggs[x].cell_index == i && cells[i].type == 1)
+					for (int x = 0; x < MAX_RESSOURCES; x++)
 					{
-						delete_egg(eggs, x);
-						fprintf(stderr, "MAX_EGGS = %d\n", MAX_EGGS);
+						if (targets[b].ressources[x].cell_index == i)
+						{
+							delete_resource(targets[b].ressources, x);
+						}
 					}
 				}
 			}
         }
-		print_targets(my_base_index, ressources, eggs);
+		print_targets(targets, number_of_bases);
     }
     free(my_base_indices);
     free(opp_base_indices);
@@ -159,23 +162,33 @@ void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, 
 		qsort(eggs, MAX_EGGS, sizeof(t_eggs), compare_eggs);
 }
 
-int getNumberofNeighbors(t_cell *cells, int cell_index) {
-	int number_of_neighbors = 0;
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i) {
+    t_target* targets = malloc(sizeof(t_target) * 1);
 
-	if(cells[cell_index].neigh_0 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_1 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_2 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_3 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_4 != -1)
-		number_of_neighbors++;
-	if(cells[cell_index].neigh_5 != -1)
-		number_of_neighbors++;
-	return number_of_neighbors;
+        int base_index = my_base_indices[i];
+
+        // Calculer les distances
+        calculate_distances(cells, number_of_cells, base_index);
+
+        // Allouer de la mémoire pour les ressources et les œufs
+        t_ressource* ressources = malloc(sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        t_eggs* eggs = malloc(sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Initialiser les tableaux avec des zéros
+        memset(ressources, 0, sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        memset(eggs, 0, sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Analyser les ressources et les œufs
+        parse_rs_eggs(cells, number_of_cells, ressources, eggs);
+
+        // Assigner les valeurs aux cibles
+        targets[0].base_index = base_index;
+        targets[0].ressources = ressources;
+        targets[0].eggs = eggs;
+
+    return *targets;
 }
+
 
 void parse_cells(t_cell *cells, int number_of_cells){
 	for (int i = 0; i < number_of_cells; i++)
@@ -195,22 +208,20 @@ void parse_cells(t_cell *cells, int number_of_cells){
 };
 
 void delete_resource(t_ressource* ressources, int index) {
-    if (index >= 0 && index < MAX_RESSOURCES) {
-        for (int i = index; i < MAX_RESSOURCES - 1; i++) {
-            ressources[i] = ressources[i + 1];
-        }
-        MAX_RESSOURCES--;
+    for (int i = index; i < MAX_RESSOURCES - 1; i++) {
+        ressources[i] = ressources[i + 1];
     }
+    memset(&ressources[MAX_RESSOURCES - 1], -1, sizeof(t_ressource));
 }
 
 void delete_egg(t_eggs* eggs, int index) {
-    if (index >= 0 && index < MAX_EGGS) {
-        for (int i = index; i < MAX_EGGS - 1; i++) {
-            eggs[i] = eggs[i + 1];
-        }
-        MAX_EGGS--;
+    for (int i = index; i < MAX_EGGS - 1; i++) {
+        eggs[i] = eggs[i + 1];
     }
+
+    memset(&eggs[MAX_EGGS - 1], -1, sizeof(t_ressource));
 }
+
 
 void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
     int* queue = malloc(sizeof(int) * number_of_cells);
@@ -302,12 +313,35 @@ int compare_eggs(const void* a, const void* b) {
 		return 0;
 }
 
-void print_targets(int my_base_index, t_ressource *ressources, t_eggs *eggs){
-	if (MAX_RESSOURCES > 0)
-		printf("LINE %d %d %d;", my_base_index, ressources[0].cell_index, 3);
-	if (MAX_EGGS > 0)
-		printf("LINE %d %d %d", my_base_index, eggs[0].cell_index, 1);
-	if (MAX_EGGS == 0)
-		printf("LINE %d %d %d;", my_base_index, ressources[0].cell_index, 3);
+void	basic_strategy(t_target *targets, int number_of_bases)
+{
+	for (int i = 0; i < number_of_bases; i++)
+	{
+		if (TURN < 3)
+		{
+			for (int y = 0; y < 3; y++){
+				if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs[y].cell_index, 1);
+			}
+		}
+		else
+		{
+			for (int x = 0; x < TURN ; x++)
+			{
+				if (targets[i].eggs[x].cell_index > 0 && MAX_EGGS > 0)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs[x].cell_index, 1);
+			}
+			for (int x = 0; x < TURN / 3; x++){
+				if (targets[i].ressources[x].cell_index > 0 && MAX_RESSOURCES > 0)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].ressources[x].cell_index, 1);
+			}	
+		}
+	}
 	printf("\n");
+}
+
+void print_targets(t_target *targets, int number_of_bases){
+	if (STRATEGY == 1)
+		basic_strategy(targets, number_of_bases);
+	TURN++;
 }

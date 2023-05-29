@@ -2,14 +2,18 @@
 
 int MAX_RESSOURCES = 0;
 int MAX_EGGS = 0;
-int TURN = 1;
-int wait = 0;
+int TURN = 0;
+int GOAL = 0;
+int CRYSTAL = 0;
+int STRATEGY = 1;
+int START_CRYSTALL = 0;
+
 
 int main() {
 
 	int number_of_cells;
 	scanf("%d", &number_of_cells);
-
+	
 	t_cell cells[number_of_cells + 1];
 	
 	// parse cells
@@ -29,26 +33,13 @@ int main() {
     for (int i = 0; i < number_of_bases; i++) {
         scanf("%d", &opp_base_indices[i]);
     }
-
 	for (int i = 0; i < number_of_bases; i++) {
 		fprintf(stderr, "my base index: %d\n", my_base_indices[i]);
 	}
 
 	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
-
 	for (int i = 0; i < number_of_bases; i++) {
 		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
-	}
-
-	fprintf(stderr, "----------------\n");
-	for (int i = 0; i < number_of_bases; i++){
-		fprintf(stderr, "BASE %d index = %d\n", i, targets[i].base_index);
-		for (int x = 0; x < MAX_EGGS; x++) {
-			fprintf(stderr, "EGGS %d, distance %d\n", targets[i].eggs[x].cell_index, targets[i].eggs[x].distance_to_base);
-		}
-		for (int x = 0; x < MAX_RESSOURCES; x++){
-			fprintf(stderr, "Ressource %d, distance %d\n", targets[i].ressources[x].cell_index, targets[i].ressources[x].distance_to_base);
-		}
 	}
 
     // MAIN LOOP

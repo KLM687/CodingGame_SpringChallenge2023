@@ -1,33 +1,34 @@
 #include "ant.h"
 
-void print_targets(t_target *targets, int number_of_bases){
-
-			fprintf(stderr, "----------------\n");
-	for (int i = 0; i < number_of_bases; i++){
-		fprintf(stderr, "BASE %d index = %d\n", i, targets[i].base_index);
-		for (int x = 0; x < MAX_EGGS; x++) {
-			fprintf(stderr, "EGGS %d, distance %d\n", targets[i].eggs[x].cell_index, targets[i].eggs[x].distance_to_base);
-		}
-		for (int x = 0; x < MAX_RESSOURCES; x++){
-			fprintf(stderr, "Ressource %d, distance %d\n", targets[i].ressources[x].cell_index, targets[i].ressources[x].distance_to_base);
-		}
-	}
-		for (int i = 0; i < number_of_bases; i++){
+void	basic_strategy(t_target *targets, int number_of_bases)
+{
+	for (int i = 0; i < number_of_bases; i++)
+	{
+		if (TURN < 3)
 		{
-			for (int x = 0; x < TURN; x++)
+			for (int y = 0; y < 3; y++){
+				if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs[y].cell_index, 1);
+			}
+		}
+		else
+		{
+			for (int x = 0; x < TURN ; x++)
 			{
 				if (targets[i].eggs[x].cell_index > 0 && MAX_EGGS > 0)
 					printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs[x].cell_index, 1);
 			}
-			if (TURN > 2)
-			{
-				for (int x = 0; x < TURN; x++){
-					if (targets[i].ressources[x].cell_index > 0 && MAX_RESSOURCES > 0)
-						printf("LINE %d %d %d;", targets[i].base_index, targets[i].ressources[x].cell_index, 1);
-				}	
-			}
+			for (int x = 0; x < TURN / 3; x++){
+				if (targets[i].ressources[x].cell_index > 0 && MAX_RESSOURCES > 0)
+					printf("LINE %d %d %d;", targets[i].base_index, targets[i].ressources[x].cell_index, 1);
+			}	
 		}
 	}
-	TURN++;
 	printf("\n");
+}
+
+void print_targets(t_target *targets, int number_of_bases){
+	if (STRATEGY == 1)
+		basic_strategy(targets, number_of_bases);
+	TURN++;
 }

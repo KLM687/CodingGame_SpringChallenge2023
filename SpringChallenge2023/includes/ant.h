@@ -69,7 +69,6 @@ void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, 
 void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
 t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
 int calculate_closest_beacon(t_cell* cells, int index);
-void mark_beacons(t_cell* cells, int index1, int index2);
 void compute_strategy(void);
 
 #endif

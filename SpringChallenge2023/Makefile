@@ -10,6 +10,8 @@ CFLAGS	=	-Wall -Wextra #-Werror
 SRCS		=	main.c \
 				parse.c \
 				compute.c \
+				strategy.c \
+				cell_operations.c \
 
 #IF YOU HAVE HEADER FILES YOU ABSOLUTELY NEED TO ADD THEM IN THE INC_FILES VAR
 INC_FILES	= 	ant.h /

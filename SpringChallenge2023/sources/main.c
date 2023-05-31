@@ -7,13 +7,14 @@ int GOAL = 0;
 int CRYSTAL = 0;
 int STRATEGY = 1;
 int START_CRYSTALL = 0;
-
+int MAX_CELLS = 0;
 
 int main() {
 
 	int number_of_cells;
 	scanf("%d", &number_of_cells);
-	
+
+	MAX_CELLS = number_of_cells;
 	t_cell cells[number_of_cells + 1];
 	
 	// parse cells
@@ -42,10 +43,17 @@ int main() {
 		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
 	}
 
+	//compute_strategy();
     // MAIN LOOP
-    while (1) {
-        for (int i = 0; i < number_of_cells; i++) {
-            int nb_resources;
+	int myScore = 0;
+	int oppScore = 0;
+	while (1)
+	{
+		scanf("%d", &myScore);
+		scanf("%d", &oppScore);
+		for (int i = 0; i < number_of_cells; i++)
+		{
+			int nb_resources;
             int my_ants;
             int opp_ants;
             scanf("%d %d %d", &nb_resources, &my_ants, &opp_ants);
@@ -69,10 +77,10 @@ int main() {
 					}
 				}
 			}
-        }
-		print_targets(targets, number_of_bases);
-    }
-    free(my_base_indices);
+		}
+		print_targets(cells, targets, number_of_bases);
+	}
+	free(my_base_indices);
     free(opp_base_indices);
     return 0;
 }

@@ -10,6 +10,7 @@
 extern int MAX_RESSOURCES;
 extern int MAX_EGGS;
 extern int TURN;
+extern int MAX_CELLS;
 extern int GOAL;
 extern int CRYSTAL;
 extern int STRATEGY;
@@ -26,6 +27,7 @@ typedef struct s_cell {
     int neigh_4;
     int neigh_5;
     int distance_to_base;
+	int tmp_distance;
 } t_cell;
 
 
@@ -56,7 +58,9 @@ void delete_resource(t_ressource *ressources, int index);
 void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
-void print_targets(t_target *targets, int number_of_bases);
+void print_targets(t_cell *cells, t_target *targets, int number_of_bases);
 t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
+int calculate_distance(t_cell* cells, int index1, int index2);
+void compute_strategy(void);
 
 #endif

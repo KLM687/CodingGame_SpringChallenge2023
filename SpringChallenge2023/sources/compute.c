@@ -15,61 +15,44 @@ void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 	int eggs = (MAX_EGGS / 2);
 	if(MAX_EGGS % 2 != 0 && eggs > 1)
 		eggs++;
-	int hit[eggs];
-	int r_hit[MAX_RESSOURCES];
-	int e = 0;
-	int r = 0;
-	memset(hit, -1, sizeof(hit));
-	for (int i = 0; i < number_of_bases; i++)
-	{
-		for (int y = 0; y < eggs; y++)
-		{
-			if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0)
-			{
-				if (not_hit(targets[i].eggs[y].cell_index, hit, eggs))
-					printf("LINE %d %d %d;", targets[i].base_index, targets[i].eggs[y].cell_index, 1);
-				for (int x = y; x < eggs; x++)
+	int rss = MYSCORE;
+	for (int i = 0; i < number_of_bases; i++) {
+		printf("BEACON %d %d;", targets[i].base_index, 1);
+		cells[targets[i].base_index].is_beacon = true;
+    	for (int y = 0; y < eggs; y++) {
+        	if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0) {
+				if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
 				{
-					if ( x != y )
-					{
-						int distance = calculate_distance(cells, targets[i].eggs[y].cell_index, targets[i].eggs[x].cell_index);
-						fprintf(stderr, "egg: %d egg: %d distance %d distbase %d\n",targets[i].eggs[y].cell_index, targets[i].eggs[x].cell_index, distance, targets[i].eggs[x].distance_to_base);
-						if (distance < targets[i].eggs[x].distance_to_base)
-						{
-							printf("LINE %d %d %d;", targets[i].eggs[y].cell_index, targets[i].eggs[x].cell_index, 1);
-							hit[e] = targets[i].eggs[x].cell_index;
-							e++;
-						}
-					}
+					calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
 				}
+        	}  
+    	}
+		fprintf(stderr, "TURN: %d\n", TURN);
+		if (TURN > 3)
+		{
+			fprintf(stderr,"MAX_RSS = %d\n", MAX_RESSOURCES);
+			for (int r = 0; r < MAX_RESSOURCES; r++)
+			{
+				if (cells[targets[i].ressources[r].cell_index].initial_ressources > 0)
+					rss += cells[targets[i].ressources[r].cell_index].initial_ressources;
+				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
+				if (rss >= GOAL)
+				{
+					fprintf(stderr, "BREAK\n");
+					int ok = 0;
+					ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+					fprintf(stderr, "ok: %d\n", ok);
+					break;
+				}
+				int ok = 0;
+				ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+				fprintf(stderr, "ok: %d\n", ok);
+
 			}
 		}
-		//if (TURN > 3)
-		//{
-			//for (int x = 0; x < TURN; x++)
-			//{
-				//if (targets[i].ressources[x].cell_index > 0 && MAX_RESSOURCES > 0)
-				//{
-					//if (not_hit(targets[i].ressources[x].cell_index, r_hit, MAX_RESSOURCES))
-						//printf("LINE %d %d %d;", targets[i].base_index, targets[i].ressources[x].cell_index, 1);
-					//for (int y = x; y < TURN; y++)
-					//{
-						//if ( y != x )
-						//{
-							//int distance = calculate_distance(cells, targets[i].ressources[x].cell_index, targets[i].ressources[y].cell_index);
-							//if (distance < targets[i].ressources[y].distance_to_base)
-							//{
-								//printf("LINE %d %d %d;", targets[i].ressources[x].cell_index, targets[i].ressources[y].cell_index, 1);
-								//r_hit[r] = targets[i].ressources[y].cell_index;
-								//r++;
-							//}
-						//}
-					//}
-				//}
-			//}
-		//}
 	}
-	printf("MESSAGE %d;", MAX_CELLS);
+	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
+	printf("MESSAGE SMALL STRATEGY;");
 	printf("\n");
 }
 
@@ -90,15 +73,61 @@ void delete_useless_eggs(t_target *targets, int number_of_bases)
 	}
 }
 
-void print_targets(t_cell *cells, t_target *targets, int number_of_bases){
+void	big_strategy(t_cell *cells, t_target *targets, int number_of_bases)
+{
+	int eggs = (MAX_EGGS / 2);
+	if(MAX_EGGS % 2 != 0 && eggs > 1)
+		eggs++;
+	int rss = MYSCORE;
+	for (int i = 0; i < number_of_bases; i++) {
+		printf("BEACON %d %d;", targets[i].base_index, 1);
+		cells[targets[i].base_index].is_beacon = true;
+    	for (int y = 0; y < eggs; y++) {
+        	if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0) {
+				if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
+				{
+					calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
+				}
+        	}  
+    	}
+		fprintf(stderr, "TURN: %d\n", TURN);
+		if (TURN > 5)
+		{
+			fprintf(stderr,"MAX_RSS = %d\n", MAX_RESSOURCES);
+			for (int r = 0; r < MAX_RESSOURCES; r++)
+			{
+				if (cells[targets[i].ressources[r].cell_index].initial_ressources > 0)
+					rss += cells[targets[i].ressources[r].cell_index].initial_ressources;
+				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
+				if (rss >= GOAL)
+				{
+					fprintf(stderr, "BREAK\n");
+					int ok = 0;
+					ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+					fprintf(stderr, "ok: %d\n", ok);
+					break;
+				}
+				int ok = 0;
+				ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+				fprintf(stderr, "ok: %d\n", ok);
+
+			}
+		}
+	}
+	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
+	printf("MESSAGE BIG STRATEGY;");
+	printf("\n");
+}
+
+void compute_targets(t_cell *cells, t_target *targets, int number_of_bases){
 	if (STRATEGY == 1)
 	{
 		delete_useless_eggs(targets, number_of_bases);
 		basic_strategy(cells, targets, number_of_bases);
 	}
-	//if (STRATEGY == 1)
-	//{
-		//big_strategy(targets, number_of_bases);
-	//}
+	else if (STRATEGY == 2)
+	{
+		big_strategy(cells, targets, number_of_bases);
+	}
 	TURN++;
 }

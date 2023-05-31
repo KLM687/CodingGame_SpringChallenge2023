@@ -1,13 +1,14 @@
 #include "ant.h"
 
-int calculate_distance(t_cell* cells, int index1, int index2) {
+void mark_beacons(t_cell* cells, int index1, int index2) {
     int* queue = malloc(sizeof(int) * MAX_CELLS);
     bool* visited = calloc(MAX_CELLS, sizeof(bool));
     if (index1 == index2)
-        return 0;
+        return;
 
     for (int i = 0; i < MAX_CELLS; i++) {
         cells[i].tmp_distance = -1;
+        cells[i].parent_index = -1;
     }
 
     int front = 0;
@@ -22,12 +23,17 @@ int calculate_distance(t_cell* cells, int index1, int index2) {
         int current_distance = cells[current_index].tmp_distance;
 
         if (current_index == index2) {
-            free(queue);
-            free(visited);
-            return current_distance;
+            // Marquer le chemin le plus court comme étant un beacon
+            int backtrack_index = current_index;
+            while (backtrack_index != index1) {
+                cells[backtrack_index].is_beacon = true;
+                backtrack_index = cells[backtrack_index].parent_index;
+            }
+            cells[index1].is_beacon = true;
+            break;
         }
 
-        current_distance++; // Augmenter la distance ici
+        current_distance++;
 
         int neigh_0 = cells[current_index].neigh_0;
         int neigh_1 = cells[current_index].neigh_1;
@@ -38,38 +44,146 @@ int calculate_distance(t_cell* cells, int index1, int index2) {
 
         if (neigh_0 >= 0 && !visited[neigh_0]) {
             cells[neigh_0].tmp_distance = current_distance;
+            cells[neigh_0].parent_index = current_index;
             queue[rear++] = neigh_0;
             visited[neigh_0] = true;
         }
         if (neigh_1 >= 0 && !visited[neigh_1]) {
             cells[neigh_1].tmp_distance = current_distance;
+            cells[neigh_1].parent_index = current_index;
             queue[rear++] = neigh_1;
             visited[neigh_1] = true;
         }
         if (neigh_2 >= 0 && !visited[neigh_2]) {
             cells[neigh_2].tmp_distance = current_distance;
+            cells[neigh_2].parent_index = current_index;
             queue[rear++] = neigh_2;
             visited[neigh_2] = true;
         }
         if (neigh_3 >= 0 && !visited[neigh_3]) {
             cells[neigh_3].tmp_distance = current_distance;
+            cells[neigh_3].parent_index = current_index;
             queue[rear++] = neigh_3;
             visited[neigh_3] = true;
         }
         if (neigh_4 >= 0 && !visited[neigh_4]) {
             cells[neigh_4].tmp_distance = current_distance;
+            cells[neigh_4].parent_index = current_index;
             queue[rear++] = neigh_4;
             visited[neigh_4] = true;
         }
         if (neigh_5 >= 0 && !visited[neigh_5]) {
             cells[neigh_5].tmp_distance = current_distance;
+            cells[neigh_5].parent_index = current_index;
             queue[rear++] = neigh_5;
             visited[neigh_5] = true;
         }
     }
-    free(queue);
+
+    // Afficher les index des cellules du chemin le plus court
+    int current_index = index2;
+    while (current_index != index1) {
+		printf("BEACON %d %d;", current_index, 1);
+		current_index = cells[current_index].parent_index;
+    }
+	printf("BEACON %d %d;", index1, 1);
+	free(queue);
     free(visited);
-    return -1;
+}
+
+int calculate_closest_beacon(t_cell* cells, int index) {
+
+	int* queue = malloc(sizeof(int) * MAX_CELLS);
+    bool* visited = calloc(MAX_CELLS, sizeof(bool));
+
+    for (int i = 0; i < MAX_CELLS; i++) {
+        cells[i].tmp_distance = -1;
+        cells[i].parent_index = -1;
+    }
+
+    int front = 0;
+    int rear = 0;
+
+    queue[rear++] = index;
+    visited[index] = true;
+    cells[index].tmp_distance = 0;
+
+	int index2 = -1;
+
+    while (front < rear) {
+    	int current_index = queue[front++];
+    	int current_distance = cells[current_index].tmp_distance;
+
+    	if (cells[current_index].is_beacon) {
+        	// Marquer le chemin le plus court comme étant un beacon
+        	int backtrack_index = current_index;
+			index2 = current_index;
+        	while (backtrack_index != index) {
+            	cells[backtrack_index].is_beacon = true;
+            	backtrack_index = cells[backtrack_index].parent_index;
+        	}
+        	cells[index].is_beacon = true;
+        	break;
+    	}
+
+    	current_distance++;
+
+    	int neigh_0 = cells[current_index].neigh_0;
+    	int neigh_1 = cells[current_index].neigh_1;
+    	int neigh_2 = cells[current_index].neigh_2;
+    	int neigh_3 = cells[current_index].neigh_3;
+    	int neigh_4 = cells[current_index].neigh_4;
+    	int neigh_5 = cells[current_index].neigh_5;
+
+    	if (neigh_0 >= 0 && !visited[neigh_0]) {
+        	cells[neigh_0].tmp_distance = current_distance;
+        	cells[neigh_0].parent_index = current_index;
+        	queue[rear++] = neigh_0;
+        	visited[neigh_0] = true;
+    	}
+    	if (neigh_1 >= 0 && !visited[neigh_1]) {
+        	cells[neigh_1].tmp_distance = current_distance;
+        	cells[neigh_1].parent_index = current_index;
+        	queue[rear++] = neigh_1;
+        	visited[neigh_1] = true;
+    	}
+    	if (neigh_2 >= 0 && !visited[neigh_2]) {
+        	cells[neigh_2].tmp_distance = current_distance;
+        	cells[neigh_2].parent_index = current_index;
+        	queue[rear++] = neigh_2;
+        	visited[neigh_2] = true;
+    	}
+    	if (neigh_3 >= 0 && !visited[neigh_3]) {
+        	cells[neigh_3].tmp_distance = current_distance;
+        	cells[neigh_3].parent_index = current_index;
+        	queue[rear++] = neigh_3;
+        	visited[neigh_3] = true;
+    	}
+    	if (neigh_4 >= 0 && !visited[neigh_4]) {
+        	cells[neigh_4].tmp_distance = current_distance;
+        	cells[neigh_4].parent_index = current_index;
+        	queue[rear++] = neigh_4;
+        	visited[neigh_4] = true;
+    	}
+    	if (neigh_5 >= 0 && !visited[neigh_5]) {
+        	cells[neigh_5].tmp_distance = current_distance;
+        	cells[neigh_5].parent_index = current_index;
+        	queue[rear++] = neigh_5;
+        	visited[neigh_5] = true;
+    	}
+	}
+    // Afficher les index des cellules du chemin le plus court
+    int current_index = index2;
+	if (index2 != -1){
+    	while (current_index != index) {
+			printf("BEACON %d %d;", current_index, 1);
+			current_index = cells[current_index].parent_index;
+    	}
+		printf("BEACON %d %d;", index, 1);
+	}
+	free(queue);
+    free(visited);
+	return (0);
 }
 
 void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
@@ -77,7 +191,7 @@ void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
     bool* visited = calloc(number_of_cells, sizeof(bool));
 
     for (int i = 0; i < number_of_cells; i++) {
-        cells[i].distance_to_base = INT_MAX;
+        cells[i].distance_to_base = INT_MAX - 1;
     }
 
     int front = 0;

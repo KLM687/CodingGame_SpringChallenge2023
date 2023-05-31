@@ -8,6 +8,8 @@ int CRYSTAL = 0;
 int STRATEGY = 1;
 int START_CRYSTALL = 0;
 int MAX_CELLS = 0;
+int MYSCORE = 0;
+int OPPSCORE = 0;
 
 int main() {
 
@@ -43,21 +45,18 @@ int main() {
 		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
 	}
 
-	//compute_strategy();
+	GOAL = (CRYSTAL / 2);
+	compute_strategy();
     // MAIN LOOP
-	int myScore = 0;
-	int oppScore = 0;
 	while (1)
 	{
-		scanf("%d", &myScore);
-		scanf("%d", &oppScore);
+		scanf("%d", &MYSCORE);
+		scanf("%d", &OPPSCORE);
 		for (int i = 0; i < number_of_cells; i++)
 		{
-			int nb_resources;
-            int my_ants;
-            int opp_ants;
-            scanf("%d %d %d", &nb_resources, &my_ants, &opp_ants);
-			if (nb_resources == 0)
+            scanf("%d %d %d", &cells[i].initial_ressources, &cells[i].my_ants, &cells[i].opp_ants);
+			cells[i].is_beacon = false;
+			if (cells[i].initial_ressources == 0)
 			{
 				for (int b = 0; b < number_of_bases; b++)
 				{
@@ -78,7 +77,7 @@ int main() {
 				}
 			}
 		}
-		print_targets(cells, targets, number_of_bases);
+		compute_targets(cells, targets, number_of_bases);
 	}
 	free(my_base_indices);
     free(opp_base_indices);

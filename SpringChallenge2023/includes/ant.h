@@ -15,19 +15,27 @@ extern int GOAL;
 extern int CRYSTAL;
 extern int STRATEGY;
 extern int START_CRYSTAL;
+extern int MYSCORE;
+extern int OPPSCORE;
 // Structure pour stocker les informations d'une cellule
 typedef struct s_cell {
     int index;
     int type;
-    int initial_resources;
+    int initial_ressources;
     int neigh_0;
     int neigh_1;
     int neigh_2;
     int neigh_3;
     int neigh_4;
     int neigh_5;
+
     int distance_to_base;
 	int tmp_distance;
+	bool is_beacon;
+	int parent_index;
+
+	int my_ants;
+	int opp_ants;
 } t_cell;
 
 
@@ -58,9 +66,10 @@ void delete_resource(t_ressource *ressources, int index);
 void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
-void print_targets(t_cell *cells, t_target *targets, int number_of_bases);
+void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
 t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
-int calculate_distance(t_cell* cells, int index1, int index2);
+int calculate_closest_beacon(t_cell* cells, int index);
+void mark_beacons(t_cell* cells, int index1, int index2);
 void compute_strategy(void);
 
 #endif

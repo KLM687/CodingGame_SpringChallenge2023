@@ -57,16 +57,22 @@ void parse_cells(t_cell *cells, int number_of_cells){
 	{
 		cells[i].index = i;
         scanf("%d %d %d %d %d %d %d %d",
-              &cells[i].type, &cells[i].initial_resources,
+              &cells[i].type, &cells[i].initial_ressources,
               &cells[i].neigh_0, &cells[i].neigh_1, &cells[i].neigh_2,
               &cells[i].neigh_3, &cells[i].neigh_4, &cells[i].neigh_5);
 		if (cells[i].type == 1) {
 			MAX_EGGS++;
 		}
 		if (cells[i].type == 2) {
-			
+			CRYSTAL += cells[i].initial_ressources;
 			MAX_RESSOURCES++;
 		}
+		cells[i].distance_to_base = -1;
+		cells[i].tmp_distance = -1;
+		cells[i].is_beacon = false;
+
+		cells[i].my_ants = 0;
+		cells[i].opp_ants = 0;
 	}
 };
 

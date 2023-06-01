@@ -52,7 +52,7 @@ void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 		}
 	}
 	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
-	printf("MESSAGE SMALL STRATEGY;");
+	printf("MESSAGE HELLO FROM 42 PARIS <3;");
 	printf("\n");
 }
 
@@ -115,7 +115,7 @@ void	big_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 		}
 	}
 	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
-	printf("MESSAGE BIG STRATEGY;");
+	printf("HELLO FROM 42 PARIS <3;");
 	printf("\n");
 }
 

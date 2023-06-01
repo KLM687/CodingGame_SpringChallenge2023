@@ -10,6 +10,8 @@ int START_CRYSTALL = 0;
 int MAX_CELLS = 0;
 int MYSCORE = 0;
 int OPPSCORE = 0;
+int MYANT = 0;
+int FORCE = 0;
 
 int main() {
 
@@ -50,12 +52,14 @@ int main() {
     // MAIN LOOP
 	while (1)
 	{
+		MYANT = 0;
 		scanf("%d", &MYSCORE);
 		scanf("%d", &OPPSCORE);
 		for (int i = 0; i < number_of_cells; i++)
 		{
             scanf("%d %d %d", &cells[i].initial_ressources, &cells[i].my_ants, &cells[i].opp_ants);
 			cells[i].is_beacon = false;
+			MYANT += cells[i].my_ants;
 			if (cells[i].initial_ressources == 0)
 			{
 				for (int b = 0; b < number_of_bases; b++)

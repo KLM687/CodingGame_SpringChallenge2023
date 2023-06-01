@@ -17,6 +17,9 @@ extern int STRATEGY;
 extern int START_CRYSTAL;
 extern int MYSCORE;
 extern int OPPSCORE;
+extern int MYANT;
+
+extern int FORCE;
 // Structure pour stocker les informations d'une cellule
 typedef struct s_cell {
     int index;

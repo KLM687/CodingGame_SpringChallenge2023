@@ -61,6 +61,7 @@ void parse_cells(t_cell *cells, int number_of_cells){
               &cells[i].neigh_0, &cells[i].neigh_1, &cells[i].neigh_2,
               &cells[i].neigh_3, &cells[i].neigh_4, &cells[i].neigh_5);
 		if (cells[i].type == 1) {
+			EGG_NB += cells[i].initial_ressources;
 			MAX_EGGS++;
 		}
 		if (cells[i].type == 2) {
@@ -73,6 +74,7 @@ void parse_cells(t_cell *cells, int number_of_cells){
 
 		cells[i].my_ants = 0;
 		cells[i].opp_ants = 0;
+		cells[i].trap = false;
 	}
 };
 

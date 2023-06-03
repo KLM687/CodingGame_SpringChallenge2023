@@ -1,13 +1,23 @@
 #include "ant.h"
 
-bool	not_hit(int cell_index, int *hit, int eggs)
+bool	half_egg()
 {
-	for (int i = 0; i < eggs; i++)
+	if (number_of_bases == 1)
 	{
-		if (hit[i] == cell_index)
-			return (false);
+		if (MYANT >= (EGG_NB / 3))
+			return (true);
+		else if (MYANT >= CRYSTAL)
+			return (true);
 	}
-	return (true);
+	else if (number_of_bases == 2)
+	{
+		if (MYANT >= (EGG_NB / 2))
+			return (true);
+		else if (MYANT >= CRYSTAL)
+			return (true);
+		
+	}
+	return (false);
 }
 
 void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
@@ -19,18 +29,22 @@ void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 	for (int i = 0; i < number_of_bases; i++) {
 		printf("BEACON %d %d;", targets[i].base_index, 1);
 		cells[targets[i].base_index].is_beacon = true;
-    	for (int y = 0; y < eggs; y++) {
-        	if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0) {
-				if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
-				{
-					calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
-				}
-        	}  
-    	}
-		fprintf(stderr, "TURN: %d\n", TURN);
-		if (TURN > 3)
+		if (MYANT < CRYSTAL)
 		{
-			fprintf(stderr,"MAX_RSS = %d\n", MAX_RESSOURCES);
+    		for (int y = 0; y < eggs; y++) {
+				fprintf(stderr, "MY ANT %ddistance to base: %d\n",MYANT, targets[i].eggs[y].distance_to_base);
+				if (MYANT < targets[i].eggs[y].distance_to_base)
+					break;
+        		if (targets[i].eggs[y].cell_index != -1 && MAX_EGGS > 0) {
+					if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
+					{
+						calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
+					}
+        		}  
+    		}
+		}
+		if (half_egg())
+		{
 			for (int r = 0; r < MAX_RESSOURCES; r++)
 			{
 				if (cells[targets[i].ressources[r].cell_index].initial_ressources > 0)
@@ -38,27 +52,21 @@ void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
 				if (rss >= GOAL)
 				{
-					fprintf(stderr, "BREAK\n");
-					int ok = 0;
-					ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
-					fprintf(stderr, "ok: %d\n", ok);
+					calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
 					break;
 				}
-				int ok = 0;
-				ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
-				fprintf(stderr, "ok: %d\n", ok);
+				calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
 
 			}
 		}
 	}
-	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
 	printf("MESSAGE HELLO FROM 42 PARIS <3;");
 	printf("\n");
 }
 
-void delete_useless_eggs(t_target *targets, int number_of_bases)
+void delete_useless_eggs(t_target *targets, int number_of_bases, float del_ratio)
 {
-	int del = MAX_EGGS / 2;
+	int del = MAX_EGGS * del_ratio;
 	if (MAX_EGGS % 2 != 0)
 		del++;
 	for (int i = 0; i < number_of_bases; i++)
@@ -80,18 +88,26 @@ void	big_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 		eggs++;
 	int rss = MYSCORE;
 	for (int i = 0; i < number_of_bases; i++) {
-		printf("BEACON %d %d;", targets[i].base_index, 1);
 		cells[targets[i].base_index].is_beacon = true;
-    	for (int y = 0; y < eggs; y++) {
-        	if (targets[i].eggs[y].cell_index > 0 && MAX_EGGS > 0) {
-				if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
-				{
-					calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
-				}
-        	}  
-    	}
+		printf("BEACON %d %d;", targets[i].base_index, 1);
+	}
+	for (int i = 0; i < number_of_bases; i++) {
+  		if (MYANT < CRYSTAL)
+		{  	
+			for (int y = 0; y < eggs; y++) {
+				fprintf(stderr, "index %d distance to base: %d\n",targets[i].eggs[y].cell_index, targets[i].eggs[y].distance_to_base);
+				if (MYANT < (targets[i].eggs[y].distance_to_base * 2) && y != 0)
+					break;
+   	  		   	if (targets[i].eggs[y].cell_index != -1 && MAX_EGGS > 0) {
+					if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
+					{
+						calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
+					}
+        		}  
+    		}
+		}
 		fprintf(stderr, "TURN: %d\n", TURN);
-		if (TURN > 5)
+		if (half_egg())
 		{
 			fprintf(stderr,"MAX_RSS = %d\n", MAX_RESSOURCES);
 			for (int r = 0; r < MAX_RESSOURCES; r++)
@@ -101,32 +117,28 @@ void	big_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
 				if (rss >= GOAL)
 				{
-					fprintf(stderr, "BREAK\n");
-					int ok = 0;
-					ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
-					fprintf(stderr, "ok: %d\n", ok);
+					calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
 					break;
 				}
-				int ok = 0;
-				ok = calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
-				fprintf(stderr, "ok: %d\n", ok);
+				calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
 
 			}
 		}
 	}
 	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
-	printf("HELLO FROM 42 PARIS <3;");
+	printf("MESSAGE HELLO FROM 42 PARIS <3;");
 	printf("\n");
 }
 
 void compute_targets(t_cell *cells, t_target *targets, int number_of_bases){
 	if (STRATEGY == 1)
 	{
-		delete_useless_eggs(targets, number_of_bases);
+		delete_useless_eggs(targets, number_of_bases, 0.5);
 		basic_strategy(cells, targets, number_of_bases);
 	}
 	else if (STRATEGY == 2)
 	{
+		delete_useless_eggs(targets, number_of_bases, 0.70);
 		big_strategy(cells, targets, number_of_bases);
 	}
 	TURN++;

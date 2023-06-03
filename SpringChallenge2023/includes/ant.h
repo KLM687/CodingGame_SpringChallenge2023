@@ -9,6 +9,7 @@
 
 extern int MAX_RESSOURCES;
 extern int MAX_EGGS;
+extern int EGG_NB;
 extern int TURN;
 extern int MAX_CELLS;
 extern int GOAL;
@@ -18,6 +19,7 @@ extern int START_CRYSTAL;
 extern int MYSCORE;
 extern int OPPSCORE;
 extern int MYANT;
+extern int number_of_bases;
 
 extern int FORCE;
 // Structure pour stocker les informations d'une cellule
@@ -33,12 +35,14 @@ typedef struct s_cell {
     int neigh_5;
 
     int distance_to_base;
+	int distance_to_ennemy;
 	int tmp_distance;
 	bool is_beacon;
 	int parent_index;
 
 	int my_ants;
 	int opp_ants;
+	bool trap;
 } t_cell;
 
 
@@ -54,6 +58,7 @@ typedef struct s_eggs {
     int type;
     int cell_index;
     int distance_to_base;
+	bool trap;
 } t_eggs;
 
 typedef struct s_target {

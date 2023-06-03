@@ -1,0 +1,599 @@
+#ifndef ANT_H
+# define ANT_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <limits.h>
+
+extern int MAX_RESSOURCES;
+extern int MAX_EGGS;
+extern int EGG_NB;
+extern int TURN;
+extern int MAX_CELLS;
+extern int GOAL;
+extern int CRYSTAL;
+extern int STRATEGY;
+extern int START_CRYSTAL;
+extern int MYSCORE;
+extern int OPPSCORE;
+extern int MYANT;
+extern int number_of_bases;
+
+extern int FORCE;
+// Structure pour stocker les informations d'une cellule
+typedef struct s_cell {
+    int index;
+    int type;
+    int initial_ressources;
+    int neigh_0;
+    int neigh_1;
+    int neigh_2;
+    int neigh_3;
+    int neigh_4;
+    int neigh_5;
+
+    int distance_to_base;
+	int distance_to_ennemy;
+	int tmp_distance;
+	bool is_beacon;
+	int parent_index;
+
+	int my_ants;
+	int opp_ants;
+	bool trap;
+} t_cell;
+
+
+// Structure pour stocker les informations d'une ressource
+typedef struct s_ressource {
+    int type;
+    int cell_index;
+    int distance_to_base;
+} t_ressource;
+
+// Structure pour stocker les informations d'un oeuf
+typedef struct s_eggs {
+    int type;
+    int cell_index;
+    int distance_to_base;
+	bool trap;
+} t_eggs;
+
+typedef struct s_target {
+	int base_index;
+	t_ressource *ressources;
+	t_eggs *eggs;
+} t_target;
+
+void calculate_distances(t_cell *cells, int number_of_cells, int base_index);
+int compare_ressources(const void *a, const void *b);
+int compare_eggs(const void *a, const void *b);
+void delete_resource(t_ressource *ressources, int index);
+void delete_egg(t_eggs *eggs, int index);
+void parse_cells(t_cell *cells, int number_of_cells);
+void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
+void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
+int calculate_closest_beacon(t_cell* cells, int index);
+void compute_strategy(void);
+
+#endif
+
+int MAX_RESSOURCES = 0;
+int MAX_EGGS = 0;
+int TURN = 0;
+int GOAL = 0;
+int CRYSTAL = 0;
+int STRATEGY = 1;
+int START_CRYSTALL = 0;
+int MAX_CELLS = 0;
+int MYSCORE = 0;
+int OPPSCORE = 0;
+int MYANT = 0;
+int FORCE = 0;
+int EGG_NB = 0;
+int number_of_bases = 0;
+
+int main() {
+
+	int number_of_cells;
+	scanf("%d", &number_of_cells);
+
+	MAX_CELLS = number_of_cells;
+	t_cell cells[number_of_cells + 1];
+	
+	// parse cells
+	parse_cells(cells, number_of_cells);
+
+	// NOMBRE DE BASES
+    scanf("%d", &number_of_bases);
+	fprintf(stderr, "number of bases: %d\n", number_of_bases);
+
+    int* my_base_indices = malloc(sizeof(int) * number_of_bases);
+    int* opp_base_indices = malloc(sizeof(int) * number_of_bases);
+
+    for (int i = 0; i < number_of_bases; i++) {
+        scanf("%d", &my_base_indices[i]);
+    }
+    for (int i = 0; i < number_of_bases; i++) {
+        scanf("%d", &opp_base_indices[i]);
+    }
+	for (int i = 0; i < number_of_bases; i++) {
+		fprintf(stderr, "my base index: %d\n", my_base_indices[i]);
+	}
+
+	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
+	for (int i = 0; i < number_of_bases; i++) {
+		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
+	}
+
+	GOAL = (CRYSTAL / 2);
+	compute_strategy();
+    // MAIN LOOP
+	while (1)
+	{
+		MYANT = 0;
+		scanf("%d", &MYSCORE);
+		scanf("%d", &OPPSCORE);
+		for (int i = 0; i < number_of_cells; i++)
+		{
+            scanf("%d %d %d", &cells[i].initial_ressources, &cells[i].my_ants, &cells[i].opp_ants);
+			cells[i].is_beacon = false;
+			MYANT += cells[i].my_ants;
+			if (cells[i].initial_ressources == 0)
+			{
+				for (int b = 0; b < number_of_bases; b++)
+				{
+					for (int x = 0; x < MAX_EGGS; x++)
+					{
+						if (targets[b].eggs[x].cell_index == i)
+						{
+							delete_egg(targets[b].eggs, x);
+						}
+					}
+					for (int x = 0; x < MAX_RESSOURCES; x++)
+					{
+						if (targets[b].ressources[x].cell_index == i)
+						{
+							delete_resource(targets[b].ressources, x);
+						}
+					}
+				}
+			}
+		}
+		compute_targets(cells, targets, number_of_bases);
+	}
+	free(my_base_indices);
+    free(opp_base_indices);
+    return 0;
+}
+
+void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs) {
+    int ressource_index = 0;
+	int egg_index = 0;
+	
+    for (int i = 0; i < number_of_cells; i++) {
+		if (cells[i].type == 1){
+			eggs[egg_index].type = cells[i].type;
+			eggs[egg_index].cell_index = cells[i].index;
+			eggs[egg_index].distance_to_base = cells[i].distance_to_base;
+			egg_index++;
+		}
+        if (cells[i].type == 2) {
+            ressources[ressource_index].type = cells[i].type;
+            ressources[ressource_index].cell_index = cells[i].index;
+            ressources[ressource_index].distance_to_base = cells[i].distance_to_base;
+            ressource_index++;
+        }
+    }
+	if (MAX_RESSOURCES > 0)
+		qsort(ressources, MAX_RESSOURCES, sizeof(t_ressource), compare_ressources);
+	if (MAX_EGGS > 0)
+		qsort(eggs, MAX_EGGS, sizeof(t_eggs), compare_eggs);
+}
+
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i) {
+    t_target* targets = malloc(sizeof(t_target) * 1);
+
+        int base_index = my_base_indices[i];
+
+        // Calculer les distances
+        calculate_distances(cells, number_of_cells, base_index);
+
+        // Allouer de la mémoire pour les ressources et les œufs
+        t_ressource* ressources = malloc(sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        t_eggs* eggs = malloc(sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Initialiser les tableaux avec des zéros
+        memset(ressources, 0, sizeof(t_ressource) * (MAX_RESSOURCES + 1));
+        memset(eggs, 0, sizeof(t_eggs) * (MAX_EGGS + 1));
+
+        // Analyser les ressources et les œufs
+        parse_rs_eggs(cells, number_of_cells, ressources, eggs);
+
+        // Assigner les valeurs aux cibles
+        targets[0].base_index = base_index;
+        targets[0].ressources = ressources;
+        targets[0].eggs = eggs;
+
+    return *targets;
+}
+
+
+void parse_cells(t_cell *cells, int number_of_cells){
+	for (int i = 0; i < number_of_cells; i++)
+	{
+		cells[i].index = i;
+        scanf("%d %d %d %d %d %d %d %d",
+              &cells[i].type, &cells[i].initial_ressources,
+              &cells[i].neigh_0, &cells[i].neigh_1, &cells[i].neigh_2,
+              &cells[i].neigh_3, &cells[i].neigh_4, &cells[i].neigh_5);
+		if (cells[i].type == 1) {
+			EGG_NB += cells[i].initial_ressources;
+			MAX_EGGS++;
+		}
+		if (cells[i].type == 2) {
+			CRYSTAL += cells[i].initial_ressources;
+			MAX_RESSOURCES++;
+		}
+		cells[i].distance_to_base = -1;
+		cells[i].tmp_distance = -1;
+		cells[i].is_beacon = false;
+
+		cells[i].my_ants = 0;
+		cells[i].opp_ants = 0;
+		cells[i].trap = false;
+	}
+};
+
+void delete_resource(t_ressource* ressources, int index) {
+    for (int i = index; i < MAX_RESSOURCES - 1; i++) {
+        ressources[i] = ressources[i + 1];
+    }
+    memset(&ressources[MAX_RESSOURCES - 1], -1, sizeof(t_ressource));
+}
+
+void delete_egg(t_eggs* eggs, int index) {
+    for (int i = index; i < MAX_EGGS - 1; i++) {
+        eggs[i] = eggs[i + 1];
+    }
+
+    memset(&eggs[MAX_EGGS - 1], -1, sizeof(t_ressource));
+}
+
+int compare_ressources(const void* a, const void* b) {
+    const t_ressource* ressource_a = (const t_ressource*)a;
+    const t_ressource* ressource_b = (const t_ressource*)b;
+
+	if (ressource_a->distance_to_base < ressource_b->distance_to_base)
+		return -1;
+	else if (ressource_a->distance_to_base > ressource_b->distance_to_base)
+		return 1;
+	else
+		return 0;
+}
+
+
+int compare_eggs(const void* a, const void* b) {
+	t_eggs* egg_a = (t_eggs*)a;
+	t_eggs* egg_b = (t_eggs*)b;
+
+	if (egg_a->distance_to_base < egg_b->distance_to_base) 
+		return -1;
+	else if (egg_a->distance_to_base > egg_b->distance_to_base) 
+		return 1;
+	else 
+		return 0;
+}
+
+bool	half_egg()
+{
+	if (number_of_bases == 1)
+	{
+		if (MYANT >= (EGG_NB / 3))
+			return (true);
+		else if (MYANT >= CRYSTAL)
+			return (true);
+	}
+	else if (number_of_bases == 2)
+	{
+		if (MYANT >= (EGG_NB / 2))
+			return (true);
+		else if (MYANT >= CRYSTAL)
+			return (true);
+		
+	}
+	return (false);
+}
+
+void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
+{
+	int eggs = (MAX_EGGS / 2);
+	if(MAX_EGGS % 2 != 0 && eggs > 1)
+		eggs++;
+	int rss = MYSCORE;
+	for (int i = 0; i < number_of_bases; i++) {
+		printf("BEACON %d %d;", targets[i].base_index, 1);
+		cells[targets[i].base_index].is_beacon = true;
+		if (MYANT < CRYSTAL)
+		{
+    		for (int y = 0; y < eggs; y++) {
+				fprintf(stderr, "MY ANT %ddistance to base: %d\n",MYANT, targets[i].eggs[y].distance_to_base);
+				if (MYANT < targets[i].eggs[y].distance_to_base)
+					break;
+        		if (targets[i].eggs[y].cell_index != -1 && MAX_EGGS > 0) {
+					if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
+					{
+						calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
+					}
+        		}  
+    		}
+		}
+		if (half_egg())
+		{
+			for (int r = 0; r < MAX_RESSOURCES; r++)
+			{
+				if (cells[targets[i].ressources[r].cell_index].initial_ressources > 0)
+					rss += cells[targets[i].ressources[r].cell_index].initial_ressources;
+				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
+				if (rss >= GOAL)
+				{
+					calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+					break;
+				}
+				calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+
+			}
+		}
+	}
+	printf("MESSAGE HELLO FROM 42 PARIS <3;");
+	printf("\n");
+}
+
+void delete_useless_eggs(t_target *targets, int number_of_bases, float del_ratio)
+{
+	int del = MAX_EGGS * del_ratio;
+	if (MAX_EGGS % 2 != 0)
+		del++;
+	for (int i = 0; i < number_of_bases; i++)
+	{
+		for (int y = del; y < MAX_EGGS; y++)
+		{
+			if (targets[i].eggs[y].cell_index > 0)
+			{
+				delete_egg(targets[i].eggs, y);
+			}
+		}
+	}
+}
+
+void	big_strategy(t_cell *cells, t_target *targets, int number_of_bases)
+{
+	int eggs = (MAX_EGGS / 2);
+	if(MAX_EGGS % 2 != 0 && eggs > 1)
+		eggs++;
+	int rss = MYSCORE;
+	for (int i = 0; i < number_of_bases; i++) {
+		cells[targets[i].base_index].is_beacon = true;
+		printf("BEACON %d %d;", targets[i].base_index, 1);
+	}
+	for (int i = 0; i < number_of_bases; i++) {
+  		if (MYANT < CRYSTAL)
+		{  	
+			for (int y = 0; y < eggs; y++) {
+				fprintf(stderr, "index %d distance to base: %d\n",targets[i].eggs[y].cell_index, targets[i].eggs[y].distance_to_base);
+				if (MYANT < (targets[i].eggs[y].distance_to_base * 2) && y != 0)
+					break;
+   	  		   	if (targets[i].eggs[y].cell_index != -1 && MAX_EGGS > 0) {
+					if (cells[targets[i].eggs[y].cell_index].is_beacon == false)
+					{
+						calculate_closest_beacon(cells, targets[i].eggs[y].cell_index);
+					}
+        		}  
+    		}
+		}
+		fprintf(stderr, "TURN: %d\n", TURN);
+		if (half_egg())
+		{
+			fprintf(stderr,"MAX_RSS = %d\n", MAX_RESSOURCES);
+			for (int r = 0; r < MAX_RESSOURCES; r++)
+			{
+				if (cells[targets[i].ressources[r].cell_index].initial_ressources > 0)
+					rss += cells[targets[i].ressources[r].cell_index].initial_ressources;
+				fprintf(stderr, "rss: %d\n", targets[i].ressources[r].cell_index);
+				if (rss >= GOAL)
+				{
+					calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+					break;
+				}
+				calculate_closest_beacon(cells, targets[i].ressources[r].cell_index);
+
+			}
+		}
+	}
+	fprintf(stderr, "rss %d goal %d\n", rss, GOAL);
+	printf("MESSAGE HELLO FROM 42 PARIS <3;");
+	printf("\n");
+}
+
+void compute_targets(t_cell *cells, t_target *targets, int number_of_bases){
+	if (STRATEGY == 1)
+	{
+		delete_useless_eggs(targets, number_of_bases, 0.5);
+		basic_strategy(cells, targets, number_of_bases);
+	}
+	else if (STRATEGY == 2)
+	{
+		delete_useless_eggs(targets, number_of_bases, 0.70);
+		big_strategy(cells, targets, number_of_bases);
+	}
+	TURN++;
+}
+
+void compute_strategy(void){
+	if (MAX_CELLS < 50)
+		STRATEGY = 1;
+	if (MAX_CELLS > 50)
+		STRATEGY = 2;
+}
+
+int calculate_closest_beacon(t_cell* cells, int index) {
+
+	int* queue = malloc(sizeof(int) * MAX_CELLS);
+    bool* visited = calloc(MAX_CELLS, sizeof(bool));
+
+    for (int i = 0; i < MAX_CELLS; i++) {
+        cells[i].tmp_distance = -1;
+        cells[i].parent_index = -1;
+    }
+
+    int front = 0;
+    int rear = 0;
+
+    queue[rear++] = index;
+    visited[index] = true;
+    cells[index].tmp_distance = 0;
+
+	int index2 = -1;
+
+    while (front < rear) {
+    	int current_index = queue[front++];
+    	int current_distance = cells[current_index].tmp_distance;
+
+    	if (cells[current_index].is_beacon) {
+        	int backtrack_index = current_index;
+			index2 = current_index;
+        	while (backtrack_index != index) {
+            	cells[backtrack_index].is_beacon = true;
+            	backtrack_index = cells[backtrack_index].parent_index;
+        	}
+        	cells[index].is_beacon = true;
+        	break;
+    	}
+
+    	current_distance++;
+
+    	int neigh_0 = cells[current_index].neigh_0;
+    	int neigh_1 = cells[current_index].neigh_1;
+    	int neigh_2 = cells[current_index].neigh_2;
+    	int neigh_3 = cells[current_index].neigh_3;
+    	int neigh_4 = cells[current_index].neigh_4;
+    	int neigh_5 = cells[current_index].neigh_5;
+
+    	if (neigh_0 >= 0 && !visited[neigh_0]) {
+        	cells[neigh_0].tmp_distance = current_distance;
+        	cells[neigh_0].parent_index = current_index;
+        	queue[rear++] = neigh_0;
+        	visited[neigh_0] = true;
+    	}
+    	if (neigh_1 >= 0 && !visited[neigh_1]) {
+        	cells[neigh_1].tmp_distance = current_distance;
+        	cells[neigh_1].parent_index = current_index;
+        	queue[rear++] = neigh_1;
+        	visited[neigh_1] = true;
+    	}
+    	if (neigh_2 >= 0 && !visited[neigh_2]) {
+        	cells[neigh_2].tmp_distance = current_distance;
+        	cells[neigh_2].parent_index = current_index;
+        	queue[rear++] = neigh_2;
+        	visited[neigh_2] = true;
+    	}
+    	if (neigh_3 >= 0 && !visited[neigh_3]) {
+        	cells[neigh_3].tmp_distance = current_distance;
+        	cells[neigh_3].parent_index = current_index;
+        	queue[rear++] = neigh_3;
+        	visited[neigh_3] = true;
+    	}
+    	if (neigh_4 >= 0 && !visited[neigh_4]) {
+        	cells[neigh_4].tmp_distance = current_distance;
+        	cells[neigh_4].parent_index = current_index;
+        	queue[rear++] = neigh_4;
+        	visited[neigh_4] = true;
+    	}
+    	if (neigh_5 >= 0 && !visited[neigh_5]) {
+        	cells[neigh_5].tmp_distance = current_distance;
+        	cells[neigh_5].parent_index = current_index;
+        	queue[rear++] = neigh_5;
+        	visited[neigh_5] = true;
+    	}
+	}
+    int current_index = index2;
+	int strength = 1;
+	if (index2 != -1){
+    	while (current_index != index) {
+			printf("BEACON %d %d;", current_index, strength);
+			current_index = cells[current_index].parent_index;
+    	}
+		printf("BEACON %d %d;", index, strength);
+	}
+	free(queue);
+	free(visited);
+	return (0);
+}
+
+void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
+    int* queue = malloc(sizeof(int) * number_of_cells);
+    bool* visited = calloc(number_of_cells, sizeof(bool));
+
+    for (int i = 0; i < number_of_cells; i++) {
+        cells[i].distance_to_base = INT_MAX - 1;
+    }
+
+    int front = 0;
+    int rear = 0;
+
+    queue[rear++] = base_index;
+    visited[base_index] = true;
+    cells[base_index].distance_to_base = 0;
+
+    while (front < rear) {
+        int current_index = queue[front++];
+        int current_distance = cells[current_index].distance_to_base + 1;
+
+        if (current_distance > INT_MAX - 1) {
+            break;
+        }
+
+        int neigh_0 = cells[current_index].neigh_0;
+        int neigh_1 = cells[current_index].neigh_1;
+        int neigh_2 = cells[current_index].neigh_2;
+        int neigh_3 = cells[current_index].neigh_3;
+        int neigh_4 = cells[current_index].neigh_4;
+        int neigh_5 = cells[current_index].neigh_5;
+
+        if (neigh_0 >= 0 && !visited[neigh_0]) {
+            cells[neigh_0].distance_to_base = current_distance;
+            queue[rear++] = neigh_0;
+            visited[neigh_0] = true;
+        }
+        if (neigh_1 >= 0 && !visited[neigh_1]) {
+            cells[neigh_1].distance_to_base = current_distance;
+            queue[rear++] = neigh_1;
+            visited[neigh_1] = true;
+        }
+        if (neigh_2 >= 0 && !visited[neigh_2]) {
+            cells[neigh_2].distance_to_base = current_distance;
+            queue[rear++] = neigh_2;
+            visited[neigh_2] = true;
+        }
+        if (neigh_3 >= 0 && !visited[neigh_3]) {
+            cells[neigh_3].distance_to_base = current_distance;
+            queue[rear++] = neigh_3;
+            visited[neigh_3] = true;
+        }
+        if (neigh_4 >= 0 && !visited[neigh_4]) {
+            cells[neigh_4].distance_to_base = current_distance;
+            queue[rear++] = neigh_4;
+            visited[neigh_4] = true;
+        }
+        if (neigh_5 >= 0 && !visited[neigh_5]) {
+            cells[neigh_5].distance_to_base = current_distance;
+            queue[rear++] = neigh_5;
+            visited[neigh_5] = true;
+        }
+    }
+    free(queue);
+    free(visited);
+}

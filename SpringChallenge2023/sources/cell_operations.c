@@ -1,11 +1,5 @@
 #include "ant.h"
 
-//int calculate_strength(t_cell *cells, int index)
-//{
-	//int strengh = 0;
-	//return 0;
-//}
-
 int calculate_closest_beacon(t_cell* cells, int index) {
 
 	int* queue = malloc(sizeof(int) * MAX_CELLS);
@@ -24,7 +18,6 @@ int calculate_closest_beacon(t_cell* cells, int index) {
     cells[index].tmp_distance = 0;
 
 	int index2 = -1;
-	int distance = 0;
 
     while (front < rear) {
     	int current_index = queue[front++];
@@ -33,7 +26,6 @@ int calculate_closest_beacon(t_cell* cells, int index) {
     	if (cells[current_index].is_beacon) {
         	int backtrack_index = current_index;
 			index2 = current_index;
-			distance = current_distance;
         	while (backtrack_index != index) {
             	cells[backtrack_index].is_beacon = true;
             	backtrack_index = cells[backtrack_index].parent_index;
@@ -88,11 +80,8 @@ int calculate_closest_beacon(t_cell* cells, int index) {
         	visited[neigh_5] = true;
     	}
 	}
-    // Afficher les index des cellules du chemin le plus court
     int current_index = index2;
 	int strength = 1;
-	fprintf(stderr, "index: %d distance: %d\n",index, distance);
-	//strength = calculate_strength(cells, index2);
 	if (index2 != -1){
     	while (current_index != index) {
 			printf("BEACON %d %d;", current_index, strength);
@@ -101,7 +90,7 @@ int calculate_closest_beacon(t_cell* cells, int index) {
 		printf("BEACON %d %d;", index, strength);
 	}
 	free(queue);
-    free(visited);
+	free(visited);
 	return (0);
 }
 

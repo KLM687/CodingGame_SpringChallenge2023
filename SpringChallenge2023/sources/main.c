@@ -12,6 +12,8 @@ int MYSCORE = 0;
 int OPPSCORE = 0;
 int MYANT = 0;
 int FORCE = 0;
+int EGG_NB = 0;
+int number_of_bases = 0;
 
 int main() {
 
@@ -25,7 +27,6 @@ int main() {
 	parse_cells(cells, number_of_cells);
 
 	// NOMBRE DE BASES
-    int number_of_bases;
     scanf("%d", &number_of_bases);
 	fprintf(stderr, "number of bases: %d\n", number_of_bases);
 

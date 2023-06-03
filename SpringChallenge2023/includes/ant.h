@@ -21,6 +21,9 @@ extern int OPPSCORE;
 extern int MYANT;
 extern int number_of_bases;
 
+extern int OPTI_RSS;
+extern int OPTI_EGG;
+
 extern int FORCE;
 // Structure pour stocker les informations d'une cellule
 typedef struct s_cell {
@@ -35,10 +38,13 @@ typedef struct s_cell {
     int neigh_5;
 
     int distance_to_base;
-	int distance_to_ennemy;
-	int tmp_distance;
+	
+    int tmp_distance;
 	bool is_beacon;
 	int parent_index;
+
+    int optimal_weigth;
+    int current_weigth;
 
 	int my_ants;
 	int opp_ants;
@@ -78,5 +84,6 @@ void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
 t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
 int calculate_closest_beacon(t_cell* cells, int index);
 void compute_strategy(void);
+void create_road_eggs(t_cell *cell,t_target *targets, int i);
 
 #endif

@@ -62,16 +62,22 @@ void parse_cells(t_cell *cells, int number_of_cells){
               &cells[i].neigh_3, &cells[i].neigh_4, &cells[i].neigh_5);
 		if (cells[i].type == 1) {
 			EGG_NB += cells[i].initial_ressources;
+			cells[i].optimal_weigth = cells[i].initial_ressources / OPTI_EGG;
 			MAX_EGGS++;
 		}
-		if (cells[i].type == 2) {
+		else if (cells[i].type == 2) {
 			CRYSTAL += cells[i].initial_ressources;
+			cells[i].optimal_weigth = cells[i].initial_ressources / OPTI_RSS;
 			MAX_RESSOURCES++;
 		}
+		else if (cells[i].type == 0) {
+			cells[i].optimal_weigth = 0;
+		}
+
 		cells[i].distance_to_base = -1;
 		cells[i].tmp_distance = -1;
 		cells[i].is_beacon = false;
-
+		cells[i].current_weigth = 0;
 		cells[i].my_ants = 0;
 		cells[i].opp_ants = 0;
 		cells[i].trap = false;
@@ -89,8 +95,8 @@ void delete_egg(t_eggs* eggs, int index) {
     for (int i = index; i < MAX_EGGS - 1; i++) {
         eggs[i] = eggs[i + 1];
     }
-
     memset(&eggs[MAX_EGGS - 1], -1, sizeof(t_ressource));
+	MAX_EGGS--;
 }
 
 int compare_ressources(const void* a, const void* b) {

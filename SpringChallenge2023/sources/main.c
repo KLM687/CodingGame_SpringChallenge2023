@@ -15,6 +15,9 @@ int FORCE = 0;
 int EGG_NB = 0;
 int number_of_bases = 0;
 
+int OPTI_RSS = 5;
+int OPTI_EGG = 5;
+
 int main() {
 
 	int number_of_cells;
@@ -45,7 +48,7 @@ int main() {
 
 	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
 	for (int i = 0; i < number_of_bases; i++) {
-		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i);
+		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i) ;
 	}
 
 	GOAL = (CRYSTAL / 2);

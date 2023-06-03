@@ -10,6 +10,7 @@ int calculate_closest_beacon(t_cell* cells, int index) {
         cells[i].parent_index = -1;
     }
 
+    int distance = 0;
     int front = 0;
     int rear = 0;
 
@@ -25,6 +26,7 @@ int calculate_closest_beacon(t_cell* cells, int index) {
 
     	if (cells[current_index].is_beacon) {
         	int backtrack_index = current_index;
+            distance = current_distance;
 			index2 = current_index;
         	while (backtrack_index != index) {
             	cells[backtrack_index].is_beacon = true;
@@ -83,15 +85,41 @@ int calculate_closest_beacon(t_cell* cells, int index) {
     int current_index = index2;
 	int strength = 1;
 	if (index2 != -1){
+        if (cells[index2].opp_ants > cells[index2].my_ants)
+            return (1);
+        else
+        {
+            if ((FORCE / distance) <= 1)
+            {
+                strength = 1;
+                return (0);
+            }
+            else
+            {
+                strength = FORCE / distance;
+                if (strength >= cells[index2].optimal_weigth)
+                    strength = cells[index2].optimal_weigth;
+                FORCE -= (strength * distance);
+
+            }
+        }
     	while (current_index != index) {
-			printf("BEACON %d %d;", current_index, strength);
 			current_index = cells[current_index].parent_index;
+            cells[current_index].current_weigth = strength;
     	}
-		printf("BEACON %d %d;", index, strength);
 	}
 	free(queue);
 	free(visited);
-	return (0);
+	return (1);
+}
+
+void create_road_eggs(t_cell *cell,t_target *targets, int i)
+{
+	for (int x = 0; x < MAX_EGGS; x++)
+	{
+		if (!calculate_closest_beacon(cell, targets[i].eggs[x].cell_index))
+            break;
+	}
 }
 
 void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {

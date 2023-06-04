@@ -38,6 +38,7 @@ typedef struct s_cell {
     int neigh_5;
 
     int distance_to_base;
+	int distance_to_enemy_base;
 	
     int tmp_distance;
 	bool is_beacon;
@@ -48,15 +49,15 @@ typedef struct s_cell {
 
 	int my_ants;
 	int opp_ants;
-	bool trap;
+	bool base;
 } t_cell;
-
 
 // Structure pour stocker les informations d'une ressource
 typedef struct s_ressource {
     int type;
     int cell_index;
     int distance_to_base;
+	int distance_to_enemy_base;
 } t_ressource;
 
 // Structure pour stocker les informations d'un oeuf
@@ -64,7 +65,7 @@ typedef struct s_eggs {
     int type;
     int cell_index;
     int distance_to_base;
-	bool trap;
+	int distance_to_enemy_base;
 } t_eggs;
 
 typedef struct s_target {
@@ -81,9 +82,10 @@ void delete_egg(t_eggs *eggs, int index);
 void parse_cells(t_cell *cells, int number_of_cells);
 void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, t_eggs *eggs);
 void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
-t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i);
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int* opp_base_indices, int i);
 int calculate_closest_beacon(t_cell* cells, int index);
 void compute_strategy(void);
 void create_road_eggs(t_cell *cell,t_target *targets, int i);
+void calculate_distances_enemy(t_cell *cells, int number_of_cells, int base_index);
 
 #endif

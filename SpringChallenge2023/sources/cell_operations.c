@@ -84,29 +84,35 @@ int calculate_closest_beacon(t_cell* cells, int index) {
 	}
     int current_index = index2;
 	int strength = 1;
-	if (index2 != -1){
-        if (cells[index2].opp_ants > cells[index2].my_ants)
+	distance++;
+	if (index2 != -1)
+	{
+		if (cells[index2].opp_ants > cells[index2].my_ants)
             return (1);
         else
         {
             if ((FORCE / distance) <= 1)
-            {
+			{
                 strength = 1;
-                return (0);
-            }
-            else
-            {
+				FORCE = 0;
+			}
+			else
+			{
                 strength = FORCE / distance;
-                if (strength >= cells[index2].optimal_weigth)
-                    strength = cells[index2].optimal_weigth;
+                if (strength >= cells[index].optimal_weigth && cells[index].optimal_weigth > cells[index].current_weigth)
+                    strength = cells[index].optimal_weigth;
                 FORCE -= (strength * distance);
-
             }
         }
     	while (current_index != index) {
 			current_index = cells[current_index].parent_index;
-            cells[current_index].current_weigth = strength;
+			if (strength > cells[current_index].current_weigth)
+            	cells[current_index].current_weigth = strength;
     	}
+		if (strength > cells[index2].current_weigth)
+		{
+			cells[index2].current_weigth = strength;
+		}
 	}
 	free(queue);
 	free(visited);
@@ -117,8 +123,13 @@ void create_road_eggs(t_cell *cell,t_target *targets, int i)
 {
 	for (int x = 0; x < MAX_EGGS; x++)
 	{
+		fprintf(stderr, "egg %d dist: %d dist_enemy: %d \n", targets[i].eggs[x].cell_index, targets[i].eggs[x].distance_to_enemy_base, targets[i].eggs[x].distance_to_base);
+		if (targets[i].eggs[x].distance_to_enemy_base < targets[i].eggs[x].distance_to_base)
+			break;
 		if (!calculate_closest_beacon(cell, targets[i].eggs[x].cell_index))
             break;
+		if (FORCE == 0)
+			break;
 	}
 }
 
@@ -186,3 +197,69 @@ void calculate_distances(t_cell* cells, int number_of_cells, int base_index) {
     free(queue);
     free(visited);
 }
+
+void calculate_distances_enemy(t_cell* cells, int number_of_cells, int base_index) {
+    int* queue = malloc(sizeof(int) * number_of_cells);
+    bool* visited = calloc(number_of_cells, sizeof(bool));
+
+    for (int i = 0; i < number_of_cells; i++) {
+        cells[i].distance_to_enemy_base = INT_MAX - 1;
+    }
+
+    int front = 0;
+    int rear = 0;
+
+    queue[rear++] = base_index;
+    visited[base_index] = true;
+    cells[base_index].distance_to_enemy_base = 0;
+
+    while (front < rear) {
+        int current_index = queue[front++];
+        int current_distance = cells[current_index].distance_to_enemy_base + 1;
+
+        if (current_distance > INT_MAX - 1) {
+            break;
+        }
+
+        int neigh_0 = cells[current_index].neigh_0;
+        int neigh_1 = cells[current_index].neigh_1;
+        int neigh_2 = cells[current_index].neigh_2;
+        int neigh_3 = cells[current_index].neigh_3;
+        int neigh_4 = cells[current_index].neigh_4;
+        int neigh_5 = cells[current_index].neigh_5;
+
+        if (neigh_0 >= 0 && !visited[neigh_0]) {
+            cells[neigh_0].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_0;
+            visited[neigh_0] = true;
+        }
+        if (neigh_1 >= 0 && !visited[neigh_1]) {
+            cells[neigh_1].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_1;
+            visited[neigh_1] = true;
+        }
+        if (neigh_2 >= 0 && !visited[neigh_2]) {
+            cells[neigh_2].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_2;
+            visited[neigh_2] = true;
+        }
+        if (neigh_3 >= 0 && !visited[neigh_3]) {
+            cells[neigh_3].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_3;
+            visited[neigh_3] = true;
+        }
+        if (neigh_4 >= 0 && !visited[neigh_4]) {
+            cells[neigh_4].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_4;
+            visited[neigh_4] = true;
+        }
+        if (neigh_5 >= 0 && !visited[neigh_5]) {
+            cells[neigh_5].distance_to_enemy_base = current_distance;
+            queue[rear++] = neigh_5;
+            visited[neigh_5] = true;
+        }
+    }
+    free(queue);
+    free(visited);
+}
+

@@ -9,12 +9,14 @@ void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, 
 			eggs[egg_index].type = cells[i].type;
 			eggs[egg_index].cell_index = cells[i].index;
 			eggs[egg_index].distance_to_base = cells[i].distance_to_base;
+			eggs[egg_index].distance_to_enemy_base = cells[i].distance_to_enemy_base;
 			egg_index++;
 		}
         if (cells[i].type == 2) {
             ressources[ressource_index].type = cells[i].type;
             ressources[ressource_index].cell_index = cells[i].index;
             ressources[ressource_index].distance_to_base = cells[i].distance_to_base;
+			ressources[ressource_index].distance_to_enemy_base = cells[i].distance_to_enemy_base;
             ressource_index++;
         }
     }
@@ -24,13 +26,17 @@ void parse_rs_eggs(t_cell *cells, int number_of_cells, t_ressource *ressources, 
 		qsort(eggs, MAX_EGGS, sizeof(t_eggs), compare_eggs);
 }
 
-t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int i) {
+t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices, int* opp_base_indices, int i) {
     t_target* targets = malloc(sizeof(t_target) * 1);
 
         int base_index = my_base_indices[i];
+		int enemy_index = opp_base_indices[i];
+		cells[base_index].optimal_weigth = INT_MAX - 1;
+		cells[base_index].base = true;
 
-        // Calculer les distances
+		// Calculer les distances
         calculate_distances(cells, number_of_cells, base_index);
+		calculate_distances_enemy(cells, number_of_cells, enemy_index);
 
         // Allouer de la mémoire pour les ressources et les œufs
         t_ressource* ressources = malloc(sizeof(t_ressource) * (MAX_RESSOURCES + 1));
@@ -80,7 +86,7 @@ void parse_cells(t_cell *cells, int number_of_cells){
 		cells[i].current_weigth = 0;
 		cells[i].my_ants = 0;
 		cells[i].opp_ants = 0;
-		cells[i].trap = false;
+		cells[i].base = false;
 	}
 };
 

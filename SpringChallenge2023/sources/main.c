@@ -48,7 +48,7 @@ int main() {
 
 	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
 	for (int i = 0; i < number_of_bases; i++) {
-		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, i) ;
+		targets[i] = calculate_targets(cells, number_of_cells, my_base_indices, opp_base_indices, i) ;
 	}
 
 	GOAL = (CRYSTAL / 2);
@@ -63,6 +63,7 @@ int main() {
 		{
             scanf("%d %d %d", &cells[i].initial_ressources, &cells[i].my_ants, &cells[i].opp_ants);
 			cells[i].is_beacon = false;
+			cells[i].current_weigth = 0;
 			MYANT += cells[i].my_ants;
 			if (cells[i].initial_ressources == 0)
 			{

@@ -139,7 +139,7 @@ void compute_targets(t_cell *cells, t_target *targets, int number_of_bases){
 		FORCE = MYANT;
 	//if (STRATEGY == 1)
 	//{
-		delete_useless_eggs(targets, number_of_bases, 0.5);
+		//delete_useless_eggs(targets, number_of_bases, 0.5);
 		basic_strategy(cells, targets, number_of_bases);
 	//}
 	//else if (STRATEGY == 2)

@@ -24,7 +24,7 @@ void 	print_road(t_cell *cells)
 {
 	for (int i = 0; i < MAX_CELLS; i++)
 	{
-		if (cells[i].is_beacon == true)
+		if (cells[i].is_beacon == true && cells[i].current_weigth != 0)
 			printf("BEACON %d %d;", i, cells[i].current_weigth);
 	}
 }
@@ -38,14 +38,11 @@ void	basic_strategy(t_cell *cells, t_target *targets, int number_of_bases)
 	for (int i = 0; i < number_of_bases; i++) {
 		cells[targets[i].base_index].is_beacon = true;
 	}
-	for (int i = 0; i < number_of_bases; i++)
-	{
-		if (MYANT < CRYSTAL)
-		{
-			create_road_eggs(cells, targets, i);
-			print_road(cells);
-		}
-	}
+		//if (MYANT < CRYSTAL)
+		//{
+		create_road_eggs(cells, targets);
+		print_road(cells);
+		//}
 		//if (half_egg())
 		//{
 			//for (int r = 0; r < MAX_RESSOURCES; r++)
@@ -133,10 +130,7 @@ void delete_useless_eggs(t_target *targets, int number_of_bases, float del_ratio
 //}
 
 void compute_targets(t_cell *cells, t_target *targets, int number_of_bases){
-	if (number_of_bases == 2)
-		FORCE = MYANT / 2;
-	else
-		FORCE = MYANT;
+	FORCE = MYANT;
 	//if (STRATEGY == 1)
 	//{
 		//delete_useless_eggs(targets, number_of_bases, 0.5);

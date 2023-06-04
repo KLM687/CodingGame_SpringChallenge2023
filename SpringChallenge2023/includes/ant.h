@@ -85,7 +85,7 @@ void compute_targets(t_cell *cells, t_target *targets, int number_of_bases);
 t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indices,int* opp_base_indices, int i);
 int calculate_closest_beacon(t_cell* cells, int index);
 void compute_strategy(void);
-void create_road_eggs(t_cell *cell,t_target *targets, int i);
+void create_road_eggs(t_cell *cell,t_target *targets);
 void calculate_distances_enemy(t_cell *cells, int number_of_cells, int base_index);
 
 #endif

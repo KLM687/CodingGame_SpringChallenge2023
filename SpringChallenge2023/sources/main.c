@@ -16,7 +16,7 @@ int EGG_NB = 0;
 int number_of_bases = 0;
 
 int OPTI_RSS = 5;
-int OPTI_EGG = 5;
+int OPTI_EGG = 10;
 
 int main() {
 
@@ -31,7 +31,6 @@ int main() {
 
 	// NOMBRE DE BASES
     scanf("%d", &number_of_bases);
-	fprintf(stderr, "number of bases: %d\n", number_of_bases);
 
     int* my_base_indices = malloc(sizeof(int) * number_of_bases);
     int* opp_base_indices = malloc(sizeof(int) * number_of_bases);
@@ -42,9 +41,6 @@ int main() {
     for (int i = 0; i < number_of_bases; i++) {
         scanf("%d", &opp_base_indices[i]);
     }
-	for (int i = 0; i < number_of_bases; i++) {
-		fprintf(stderr, "my base index: %d\n", my_base_indices[i]);
-	}
 
 	t_target *targets = malloc(sizeof(t_target) * number_of_bases + 1);
 	for (int i = 0; i < number_of_bases; i++) {

@@ -102,7 +102,6 @@ void delete_egg(t_eggs* eggs, int index) {
         eggs[i] = eggs[i + 1];
     }
     memset(&eggs[MAX_EGGS - 1], -1, sizeof(t_ressource));
-	MAX_EGGS--;
 }
 
 int compare_ressources(const void* a, const void* b) {

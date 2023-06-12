@@ -34,22 +34,17 @@ t_target calculate_targets(t_cell* cells, int number_of_cells, int *my_base_indi
 		cells[base_index].optimal_weigth = INT_MAX - 1;
 		cells[base_index].base = true;
 
-		// Calculer les distances
         calculate_distances(cells, number_of_cells, base_index);
 		calculate_distances_enemy(cells, number_of_cells, enemy_index);
 
-        // Allouer de la mémoire pour les ressources et les œufs
         t_ressource* ressources = malloc(sizeof(t_ressource) * (MAX_RESSOURCES + 1));
         t_eggs* eggs = malloc(sizeof(t_eggs) * (MAX_EGGS + 1));
 
-        // Initialiser les tableaux avec des zéros
         memset(ressources, 0, sizeof(t_ressource) * (MAX_RESSOURCES + 1));
         memset(eggs, 0, sizeof(t_eggs) * (MAX_EGGS + 1));
 
-        // Analyser les ressources et les œufs
         parse_rs_eggs(cells, number_of_cells, ressources, eggs);
 
-        // Assigner les valeurs aux cibles
         targets[0].base_index = base_index;
         targets[0].ressources = ressources;
         targets[0].eggs = eggs;
